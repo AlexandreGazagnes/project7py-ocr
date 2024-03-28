@@ -10,9 +10,18 @@ import pandas as pd
 
 
 def find_best_solution(df, maximum=500.00):
+    
 
-    #
-
+    #Action A
+    resultat = 0
+    for i in range(len(df)):
+            if resultat > maximum:
+                    break
+            print(f"{df["action_name"][i]} {df["value"][i]} {df["delta"][i]}")
+            resultat += df["value"][i] 
+            print(resultat)
+            
+            
     #
 
     #
