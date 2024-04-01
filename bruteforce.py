@@ -3,8 +3,10 @@ Main File
 """
 
 import csv
+from itertools import combinations
 import logging
 import sys
+from random import *
 
 import pandas as pd
 
@@ -13,21 +15,17 @@ def find_best_solution(df, maximum=500.00):
     
 
     #Action A
+    print("\n Action A \n")
     resultat = 0
-    for i in range(len(df)):
-            if resultat > maximum:
-                    break
-            print(f"{df["action_name"][i]} {df["value"][i]} {df["delta"][i]}")
-            resultat += df["value"][i] 
-            print(resultat)
-            
-            
-    #
-
-    #
-
-    #
-
+    i=0
+    while i != range(len(df)) and resultat < maximum and df["value"][i] < 110:
+        print(f"{df["action_name"][i]} {df["value"][i]} {df["delta"][i]}")
+        resultat += df["value"][i]
+        print(resultat)
+        i += 1
+    print("\nLa solution n°1 est la suivante : Le résultat doit être inférieure à 500 euros et la valeur doit être inférieure à 110 euros.\n")
+    print(f"Le resultat de cette solution est de {resultat}")
+    
     solution = ["action_A", "action_B", "action_C"]
 
     logging.critical("solution " + str(solution))
