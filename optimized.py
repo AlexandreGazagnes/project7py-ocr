@@ -25,7 +25,7 @@ def find_best_investments(filename, max_invest):
   print("\n Meilleur stratégie d'investissement: \n")  
 
   total_return = 0
-  for name, amount, rate in best_investments:
+  for name, amount in best_investments:
     total_return += amount
     print(f"- Investir {amount} dans {name}")
 
