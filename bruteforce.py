@@ -19,12 +19,12 @@ def find_best_solution(df, maximum=500.00):
     resultat = 0
     i=0
     while i != range(len(df)) and resultat < maximum and df["value"][i] < 110:
-        print(f"{df["action_name"][i]} {df["value"][i]} {df["delta"][i]}")
+        print(f"Investir {df["value"][i]} dans {df["action_name"][i]}")
         resultat += df["value"][i]
         print(resultat)
         i += 1
     print("\nLa solution n°1 est la suivante : Le résultat doit être inférieure à 500 euros et la valeur doit être inférieure à 110 euros.\n")
-    print(f"Le resultat de cette solution est de {resultat}")
+    print(f"Total de l'investissement: {resultat}")
     
     solution = ["action_A", "action_B", "action_C"]
 

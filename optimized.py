@@ -29,6 +29,6 @@ def find_best_investments(filename, max_invest):
     total_return += amount
     print(f"- Investir {amount} dans {name}")
 
-  print(f"\n Total return: {total_return}")
+  print(f"\n Total de l'investissement: {total_return}")
 
 find_best_investments("data/originalfile.csv", MAX_INVEST)
