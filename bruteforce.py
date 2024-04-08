@@ -36,7 +36,13 @@ def find_best_solution(df, maximum=500.00):
 
     return _df.iloc[0].action_name, _df.iloc[0].new_value
 
-    # ON VA TESTER DE FAIRE TOUS LES PORTEFEUILLES DE 2 ACTIONS
+    # ON VA TESTER DE FAIRE TOUS LES PORTEFEUILLES DE 2 ACTIONS...
+
+    list_actions= []
+    for i in range(len(_df)):
+        for j in range(i+1, len(_df)):
+            list_actions.append([_df.iloc[i].action_name, _df.iloc[j].action_name])
+
 
     # oN VA TESETER DE FAIRE TOUS LES PORTEUEILLES DE 3 ACTIONS ...
 
