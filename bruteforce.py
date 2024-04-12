@@ -37,64 +37,33 @@ def find_best_solution_1_action(df, maximum=500.00):
     return _df.iloc[0].action_name, _df.iloc[0].new_value
 
 
-def find_best_solution_2_action(df, maximum=500.00):
-
+def find_best_solution_n_action(df,n,maximum=500.00):
+    # ON VA TESTER DE FAIRE DES PORTEFEUILLES QUE DE N ACTIONS
+    
     all_candidats = list(df.action_name.values)
 
-    list_portefeuilles = sorted(list(combinations(all_candidats, 2)))
+    list_portefeuilles = sorted(combinations(all_candidats, n))
 
     portefeuilles_sous_500 = list()
-    for a0, a1 in list_portefeuilles:
+    valeur_totale = 0
 
-        p0 = df.loc[df.action_name == a0, "value"].iloc[0]
-        p1 = df.loc[df.action_name == a1, "value"].iloc[0]
-
-        if p0 + p1 <= 500:
-            portefeuilles_sous_500.append((a0, a1))
+    # teste les combinaisons
+    for combo in list_portefeuilles:
+        for action in combo:
+            valeur_totale += df.loc[df.action_name == action, "value"].iloc[0]
+            if valeur_totale <= maximum:
+                portefeuilles_sous_500.append(combo)
+                valeur_totale = 0
 
     portefeuilles_gains = list()
-    for a0, a1 in portefeuilles_sous_500:
-        gain = (
-            df.loc[df.action_name == a0, "new_value"].iloc[0]
-            + df.loc[df.action_name == a1, "new_value"].iloc[0]
-        )
-        # print(f"portefeuille {a0} {a1} : {gain}")
-
-        portefeuilles_gains.append((a0, a1, gain))
-
+    # calcul le gain
+    for combo in portefeuilles_sous_500:
+        gain_total = 0
+        gain_total += df.loc[df.action_name == action, "new_value"].iloc[0]
+        portefeuilles_gains.append((combo, gain_total))
     # tri
-    portefeuilles_gains = sorted(portefeuilles_gains, key=lambda x: x[2], reverse=True)
-
-    return portefeuilles_gains[0]
-
-
-def find_best_solution_N_action(nombre_dactions, df, maximum=500.00):
-    pass
-
-
-# oN VA TESETER DE FAIRE TOUS LES PORTEUEILLES DE 3 ACTIONS ...
-
-# ETC ETC
-
-# ON VA TESTER DE PRENDRE TOUTES LES ACTIONS
-
-# #Action A
-# print("\n Action A \n")
-# resultat = 0
-# i=0
-# while i != range(len(df)) and resultat < maximum and df["value"][i] < 110:
-#     print(f"Investir {df["value"][i]} dans {df["action_name"][i]}")
-#     resultat += df["value"][i]
-#     print(resultat)
-#     i += 1
-# print("\nLa solution n°1 est la suivante : Le résultat doit être inférieure à 500 euros et la valeur doit être inférieure à 110 euros.\n")
-# print(f"Total de l'investissement: {resultat}")
-
-# solution = ["action_A", "action_B", "action_C"]
-
-# logging.critical("solution " + str(solution))
-
-# return solution
+    portefeuilles_gains = sorted(portefeuilles_gains, key=lambda x: x[1], reverse=True)
+    return portefeuilles_gains[:n]
 
 
 def return_csv_file():
@@ -154,9 +123,8 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
-    solution = find_best_solution(df)
-
-    print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$f")
+    solution = find_best_solution_n_action(df,20)
+    print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$")
 
 
 if __name__ == "__main__":
