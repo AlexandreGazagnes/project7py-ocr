@@ -37,34 +37,26 @@ def find_best_solution_1_action(df, maximum=500.00):
     return _df.iloc[0].action_name, _df.iloc[0].new_value
 
 
+def get_combinations(df, n):
+    action = list(df['action_name'].unique())
+    return combinations(action, n)
+
 def find_best_solution_n_action(df,n,maximum=500.00):
-    # ON VA TESTER DE FAIRE DES PORTEFEUILLES QUE DE N ACTIONS
-    
-    all_candidats = list(df.action_name.values)
+    data = {row['action_name']: row['new_value'] for _, row in df.iterrows()}
+    combinations = get_combinations(df,n)
+    filtered_combinations = list()
 
-    list_portefeuilles = sorted(combinations(all_candidats, n))
-
-    portefeuilles_sous_500 = list()
-    valeur_totale = 0
-
-    # teste les combinaisons
-    for combo in list_portefeuilles:
+    for combo in combinations:
+        total_gain = 0
         for action in combo:
-            valeur_totale += df.loc[df.action_name == action, "value"].iloc[0]
-            if valeur_totale <= maximum:
-                portefeuilles_sous_500.append(combo)
-                valeur_totale = 0
-
-    portefeuilles_gains = list()
-    # calcul le gain
-    for combo in portefeuilles_sous_500:
-        gain_total = 0
-        gain_total += df.loc[df.action_name == action, "new_value"].iloc[0]
-        portefeuilles_gains.append((combo, gain_total))
-    # tri
-    portefeuilles_gains = sorted(portefeuilles_gains, key=lambda x: x[1], reverse=True)
-    return portefeuilles_gains[:n]
-
+            total_gain += data[action]
+            print(total_gain)
+            if total_gain > maximum:
+                break
+            else:
+                filtered_combinations.append(combo)
+    top_combo = sorted(filtered_combinations, key=lambda x:x[1],reverse=True)
+    return top_combo[0]
 
 def return_csv_file():
     """Load a csv file"""
@@ -124,7 +116,7 @@ def main():
     df = use_pandas()
     df = compute_values(df)
     solution = find_best_solution_n_action(df,20)
-    print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$")
+    print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$$")
 
 
 if __name__ == "__main__":
