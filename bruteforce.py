@@ -12,13 +12,11 @@ import pandas as pd
 
 
 def find_best_solution_1_action(df, maximum=500.00):
-
-    # oN VA TESTER DE FAIRE DES PORTEFEUILLES QUE DE 1 ACTION
+    """test for jsut 1 action in portfolio"""
 
     all_candidats = list(df.action_name.values)
 
     # filtrer par 500
-
     candidats_inf_500 = list()
     for name in all_candidats:
         val = df.loc[df.action_name == name, "value"].iloc[0]
@@ -38,25 +36,56 @@ def find_best_solution_1_action(df, maximum=500.00):
 
 
 def get_combinations(df, n):
-    action = list(df['action_name'].unique())
-    return combinations(action, n)
+    """compute all combinations"""
 
-def find_best_solution_n_action(df,n,maximum=500.00):
-    data = {row['action_name']: row['new_value'] for _, row in df.iterrows()}
-    combinations = get_combinations(df,n)
+    if isinstance(df, pd.DataFrame):
+        action_list = df["action_name"].unique().tolist()
+    else:
+        action_list = list(df)
+
+    return list(combinations(action_list, n))
+
+
+def find_best_solution_n_action(df, n, maximum=500.00):
+    """ """
+    # attention Jo, ici c'est pas la new value qu'il faut prendre, c'est bien la valeur
+    # initiale de l'action
+
+    ###### ICI C'est pas  new_value qu'il faut prendre cest le prix de l'acion
+    data = {row["action_name"]: row["new_value"] for _, row in df.iterrows()}
+
+    # ok
+    combinations = get_combinations(df, n)
+
+    # ok
     filtered_combinations = list()
 
+    # ok
     for combo in combinations:
-        total_gain = 0
+
+        # j'ai changé le le  nom de la variable pour t'aider
+        total_depense_achat_des_actions = 0
+
+        # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
         for action in combo:
-            total_gain += data[action]
-            print(total_gain)
-            if total_gain > maximum:
+            total_depense_achat_des_actions += data[action]
+            print(total_depense_achat_des_actions)
+            if total_depense_achat_des_actions > maximum:
+                # on ne garde pas ce portefeuille
                 break
             else:
                 filtered_combinations.append(combo)
-    top_combo = sorted(filtered_combinations, key=lambda x:x[1],reverse=True)
+
+    # filtered_combinations c'est la liste des action qu'on a le droit d'acheter
+
+    # ENSUITE ICI il FAUT FAIRE +/- la meme chose MAIS... pour la somme des valuers qu'on a gagén
+    # TU PEUX COPIER / COLLER LE CODE MAIS Pour l'argent des actions qu'on a gagné
+
+    top_combo = sorted(filtered_combinations, key=lambda x: x[1], reverse=True)
+
+    # OK
     return top_combo[0]
+
 
 def return_csv_file():
     """Load a csv file"""
@@ -115,7 +144,7 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
-    solution = find_best_solution_n_action(df,20)
+    solution = find_best_solution_n_action(df, 20)
     print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$$")
 
 
