@@ -51,7 +51,7 @@ def find_best_solution_n_action(df, maximum=500.00):
     all_candidats = list(df.action_name.values)
 
 
-    combinations = get_combinations(all_candidats, 20)
+    combinations = get_combinations(all_candidats, len(df))
     # ok
     filtered_combinations = list()
 
