@@ -63,7 +63,6 @@ def find_best_solution_n_action(df, maximum=500.00):
         # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
         for action in combo:
             total_depense_achat_des_actions += df.loc[df.action_name == action, "value"].iloc[0]
-            print(f"total_depense_achat_des_actions {total_depense_achat_des_actions}")
             if total_depense_achat_des_actions >= maximum:
                 # on ne garde pas ce portefeuille
                 break
@@ -78,7 +77,6 @@ def find_best_solution_n_action(df, maximum=500.00):
         total_depense_achat_des_actions = 0
         for action in combo:
             total_depense_achat_des_actions += df.loc[df.action_name == action, "new_value"].iloc[0]
-            print(f"total_depense_achat_des_actions {total_depense_achat_des_actions}")
             if total_depense_achat_des_actions >= maximum:
                 # on ne garde pas ce portefeuille
                 break
