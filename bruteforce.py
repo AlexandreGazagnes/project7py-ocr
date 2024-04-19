@@ -46,31 +46,25 @@ def get_combinations(df, n):
     return list(combinations(action_list, n))
 
 
-def find_best_solution_n_action(df, n, maximum=500.00):
-    """ """
-    # attention Jo, ici c'est pas la new value qu'il faut prendre, c'est bien la valeur
-    # initiale de l'action
+def find_best_solution_n_action(df, maximum=500.00):
 
-    ###### ICI C'est pas  new_value qu'il faut prendre cest le prix de l'acion
-    data = {row["action_name"]: row["new_value"] for _, row in df.iterrows()}
+    all_candidats = list(df.action_name.values)
 
-    # ok
-    combinations = get_combinations(df, n)
 
+    combinations = get_combinations(all_candidats, 20)
     # ok
     filtered_combinations = list()
 
     # ok
     for combo in combinations:
-
         # j'ai changé le le  nom de la variable pour t'aider
         total_depense_achat_des_actions = 0
 
         # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
         for action in combo:
-            total_depense_achat_des_actions += data[action]
-            print(total_depense_achat_des_actions)
-            if total_depense_achat_des_actions > maximum:
+            total_depense_achat_des_actions += df.loc[df.action_name == action, "value"].iloc[0]
+            print(f"total_depense_achat_des_actions {total_depense_achat_des_actions}")
+            if total_depense_achat_des_actions >= maximum:
                 # on ne garde pas ce portefeuille
                 break
             else:
@@ -80,11 +74,19 @@ def find_best_solution_n_action(df, n, maximum=500.00):
 
     # ENSUITE ICI il FAUT FAIRE +/- la meme chose MAIS... pour la somme des valuers qu'on a gagén
     # TU PEUX COPIER / COLLER LE CODE MAIS Pour l'argent des actions qu'on a gagné
-
-    top_combo = sorted(filtered_combinations, key=lambda x: x[1], reverse=True)
+    for combo in filtered_combinations:
+        total_depense_achat_des_actions = 0
+        for action in combo:
+            total_depense_achat_des_actions += df.loc[df.action_name == action, "new_value"].iloc[0]
+            print(f"total_depense_achat_des_actions {total_depense_achat_des_actions}")
+            if total_depense_achat_des_actions >= maximum:
+                # on ne garde pas ce portefeuille
+                break
+            else:
+                top_combo = total_depense_achat_des_actions
 
     # OK
-    return top_combo[0]
+    return top_combo
 
 
 def return_csv_file():
@@ -144,7 +146,7 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
-    solution = find_best_solution_n_action(df, 20)
+    solution = find_best_solution_n_action(df)
     print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$$")
 
 
