@@ -46,12 +46,22 @@ def get_combinations(df, n):
     return list(combinations(action_list, n))
 
 
-def find_best_solution_n_action(df, maximum=500.00):
+def find_best_solution_n_action(df, n, maximum=500.00):
 
     all_candidats = list(df.action_name.values)
 
+    if not n:
+        n = len(all_candidats)
+    combinations = get_combinations(all_candidats, n)
 
-    combinations = get_combinations(all_candidats, len(df))
+    print(
+        f"finding best portoflio for {n }actions => {len(combinations) } combinations"
+    )
+
+    ##################################################
+    # filtered_combinantions
+    ##################################################
+
     # ok
     filtered_combinations = list()
 
@@ -62,29 +72,43 @@ def find_best_solution_n_action(df, maximum=500.00):
 
         # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
         for action in combo:
-            total_depense_achat_des_actions += df.loc[df.action_name == action, "value"].iloc[0]
-            if total_depense_achat_des_actions >= maximum:
-                # on ne garde pas ce portefeuille
-                break
-            else:
-                filtered_combinations.append(combo)
+            total_depense_achat_des_actions += df.loc[
+                df.action_name == action, "value"
+            ].iloc[0]
+
+        # la on a caclulé la valeur d'achat du combo
+        # et on va filter pour savoir si > 500
+        if total_depense_achat_des_actions > maximum:
+            # on ne garde pas ce portefeuille
+            pass
+        else:
+            filtered_combinations.append(combo)
 
     # filtered_combinations c'est la liste des action qu'on a le droit d'acheter
 
+    #####################################################
+    # total_revenus
+    #####################################################
+
     # ENSUITE ICI il FAUT FAIRE +/- la meme chose MAIS... pour la somme des valuers qu'on a gagén
     # TU PEUX COPIER / COLLER LE CODE MAIS Pour l'argent des actions qu'on a gagné
+
+    top_combo = ""
+    max_revenu = 0
+
     for combo in filtered_combinations:
-        total_depense_achat_des_actions = 0
+
+        total_revenus = 0
         for action in combo:
-            total_depense_achat_des_actions += df.loc[df.action_name == action, "new_value"].iloc[0]
-            if total_depense_achat_des_actions >= maximum:
-                # on ne garde pas ce portefeuille
-                break
-            else:
-                top_combo = total_depense_achat_des_actions
+            total_revenus += df.loc[df.action_name == action, "new_value"].iloc[0]
+
+        if total_revenus >= max_revenu:
+            # on ne garde pas ce portefeuille
+            top_combo = combo
+            max_revenu = total_revenus
 
     # OK
-    return top_combo
+    return top_combo, max_revenu
 
 
 def return_csv_file():
@@ -144,8 +168,26 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
-    solution = find_best_solution_n_action(df)
-    print(f"$$$$$$$$$$$$$$$$$$$$ {solution} $$$$$$$$$$$$$$$$$$$$$$$")
+
+    all_candidats = list(df.action_name.values)
+
+    n_candidates = len(all_candidats)
+
+    li = []
+    # on este tous les portefeuilles à 1, action, à 2 action à 3 actions etc etc etc
+    for i in range(1, n_candidates - 1):
+        combo, best_revnue = find_best_solution_n_action(df, n=i)
+        li.append([i, combo, best_revnue])
+
+    # on tri notre liste finale
+    li = sorted(li, key=lambda i: i[2])
+
+    # on prend le dernier
+    final_i, final_combo, final_best_revenue = li[-1]
+
+    print(
+        f"$$$$$$$$$ n_action {final_i }, combo{ final_combo} => revenue {final_best_revenue} $$$$$$$$"
+    )
 
 
 if __name__ == "__main__":
