@@ -54,6 +54,10 @@ def find_best_solution_n_action(df, n, maximum=500.00):
         n = len(all_candidats)
     combinations = get_combinations(all_candidats, n)
 
+    print(
+        f"finding best portoflio for {n }actions => {len(combinations) } combinations"
+    )
+
     ##################################################
     # filtered_combinantions
     ##################################################
@@ -97,6 +101,7 @@ def find_best_solution_n_action(df, n, maximum=500.00):
         total_revenus = 0
         for action in combo:
             total_revenus += df.loc[df.action_name == action, "new_value"].iloc[0]
+
         if total_revenus >= max_revenu:
             # on ne garde pas ce portefeuille
             top_combo = combo
@@ -163,8 +168,26 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
-    combo, best_revnue = find_best_solution_n_action(df)
-    print(f"$$$$$$$$$ combo{ combo} => revenue {best_revnue} $$$$$$$$")
+
+    all_candidats = list(df.action_name.values)
+
+    n_candidates = len(all_candidats)
+
+    li = []
+    # on este tous les portefeuilles à 1, action, à 2 action à 3 actions etc etc etc
+    for i in range(1, n_candidates - 1):
+        combo, best_revnue = find_best_solution_n_action(df, n=i)
+        li.append([i, combo, best_revnue])
+
+    # on tri notre liste finale
+    li = sorted(li, key=lambda i: i[2])
+
+    # on prend le dernier
+    final_i, final_combo, final_best_revenue = li[-1]
+
+    print(
+        f"$$$$$$$$$ n_action {final_i }, combo{ final_combo} => revenue {final_best_revenue} $$$$$$$$"
+    )
 
 
 if __name__ == "__main__":
