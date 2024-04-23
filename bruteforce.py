@@ -5,7 +5,6 @@ Main File
 import csv
 from itertools import combinations
 import logging
-import sys
 from random import *
 
 import pandas as pd
@@ -96,16 +95,18 @@ def find_best_solution_n_action(df, n, maximum=500.00):
     top_combo = ""
     max_revenu = 0
 
-    for combo in filtered_combinations:
+        # Créer un dictionnaire pour stocker les nouvelles valeurs associées à chaque action
+    action_values = dict(zip(df['action_name'], df['new_value']))
 
-        total_revenus = 0
-        for action in combo:
-            total_revenus += df.loc[df.action_name == action, "new_value"].iloc[0]
+    # Précalculer les nouvelles valeurs pour chaque action dans combo
+    combo_values = [sum(action_values[action] for action in combo) for combo in filtered_combinations]
 
-        if total_revenus >= max_revenu:
-            # on ne garde pas ce portefeuille
-            top_combo = combo
-            max_revenu = total_revenus
+    # Trouver l'indice du combo avec le revenu maximal
+    max_index = max(range(len(filtered_combinations)), key=lambda i: combo_values[i])
+
+    # Récupérer le combo avec le revenu maximal
+    top_combo = filtered_combinations[max_index]
+    max_revenu = combo_values[max_index]
 
     # OK
     return top_combo, max_revenu
@@ -168,6 +169,8 @@ def main():
 
     df = use_pandas()
     df = compute_values(df)
+
+    print(df)
 
     all_candidats = list(df.action_name.values)
 
