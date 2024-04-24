@@ -47,68 +47,35 @@ def get_combinations(df, n):
 
 
 def find_best_solution_n_action(df, n, maximum=500.00):
-
+    
     all_candidats = list(df.action_name.values)
 
     if not n:
         n = len(all_candidats)
     combinations = get_combinations(all_candidats, n)
 
-    print(
-        f"finding best portoflio for {n }actions => {len(combinations) } combinations"
-    )
+    print(f"finding best portfolio for {n} actions => {len(combinations)} combinations")
 
-    ##################################################
-    # filtered_combinantions
-    ##################################################
+    filtered_combinations = []
 
-    # ok
-    filtered_combinations = list()
+    action_values = {action: df.loc[df.action_name == action, "new_value"].iloc[0] for action in all_candidats}
 
-    # ok
     for combo in combinations:
-        # j'ai changé le le  nom de la variable pour t'aider
-        total_depense_achat_des_actions = 0
-
-        # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
-        for action in combo:
-            total_depense_achat_des_actions += df.loc[
-                df.action_name == action, "new_value"
-            ].iloc[0]
-
-        # la on a caclulé la valeur d'achat du combo
-        # et on va filter pour savoir si > 500
-        if total_depense_achat_des_actions > maximum:
-            # on ne garde pas ce portefeuille
-            pass
-        else:
+        total_depense_achat_des_actions = sum(action_values[action] for action in combo)
+        
+        if total_depense_achat_des_actions <= maximum:
             filtered_combinations.append(combo)
 
-    # filtered_combinations c'est la liste des action qu'on a le droit d'acheter
-
-    #####################################################
-    # total_revenus
-    #####################################################
-
-    # ENSUITE ICI il FAUT FAIRE +/- la meme chose MAIS... pour la somme des valuers qu'on a gagén
-    # TU PEUX COPIER / COLLER LE CODE MAIS Pour l'argent des actions qu'on a gagné
-
     top_combo = ""
-    max_revenu = 0
+    max_revenue = 0
 
     for combo in filtered_combinations:
-
-        total_revenus = 0
-        for action in combo:
-            total_revenus += df.loc[df.action_name == action, "new_value"].iloc[0]
-
-        if total_revenus >= max_revenu:
-            # on ne garde pas ce portefeuille
+        total_revenues = sum(action_values[action] for action in combo)
+        if total_revenues > max_revenue:
             top_combo = combo
-            max_revenu = total_revenus
+            max_revenue = total_revenues
 
-    # OK
-    return top_combo, max_revenu
+    return top_combo, max_revenue
 
 
 def return_csv_file():
