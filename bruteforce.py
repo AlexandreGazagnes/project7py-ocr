@@ -73,7 +73,7 @@ def find_best_solution_n_action(df, n, maximum=500.00):
         # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
         for action in combo:
             total_depense_achat_des_actions += df.loc[
-                df.action_name == action, "value"
+                df.action_name == action, "new_value"
             ].iloc[0]
 
         # la on a caclulé la valeur d'achat du combo
