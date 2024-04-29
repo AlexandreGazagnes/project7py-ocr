@@ -47,7 +47,7 @@ def get_combinations(df, n):
 
 
 def find_best_solution_n_action(df, n, maximum=500.00):
-    
+
     all_candidats = list(df.action_name.values)
 
     if not n:
@@ -58,11 +58,14 @@ def find_best_solution_n_action(df, n, maximum=500.00):
 
     filtered_combinations = []
 
-    action_values = {action: df.loc[df.action_name == action, "new_value"].iloc[0] for action in all_candidats}
+    action_values = {
+        action: df.loc[df.action_name == action, "new_value"].iloc[0]
+        for action in all_candidats
+    }
 
     for combo in combinations:
         total_depense_achat_des_actions = sum(action_values[action] for action in combo)
-        
+
         if total_depense_achat_des_actions <= maximum:
             filtered_combinations.append(combo)
 

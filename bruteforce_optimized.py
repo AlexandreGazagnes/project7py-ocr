@@ -5,34 +5,10 @@ Main File
 import csv
 from itertools import combinations
 import logging
+import time
 from random import *
 
 import pandas as pd
-
-
-# ON EN A PLUS BESOIN
-# def find_best_solution_1_action(df, maximum=500.00):
-#     """test for jsut 1 action in portfolio"""
-
-#     all_candidats = list(df.action_name.values)
-
-#     # filtrer par 500
-#     candidats_inf_500 = list()
-#     for name in all_candidats:
-#         val = df.loc[df.action_name == name, "value"].iloc[0]
-#         # logging.warning(val)
-#         if val <= maximum:
-#             candidats_inf_500.append(name)
-
-#     logging.warning(f"candidats_inf_500 is {candidats_inf_500}")
-
-#     # Tri par gain
-#     _df = df.sort_values("new_value", ascending=False)
-
-#     # filtre les 500 Max par gain
-#     _df = _df.loc[df.action_name.isin(candidats_inf_500)]
-
-#     return _df.iloc[0].action_name, _df.iloc[0].new_value
 
 
 def get_combinations(df, n):
@@ -48,49 +24,44 @@ def get_combinations(df, n):
 
 def find_best_solution_n_action(df, n, max_obseverd_value, maximum=500.00):
 
+    t_0 = time.time()
+
+    top_combo = ""
+    cost = -1
+    max_revenu = -1
+
+    # liste des actions
     all_candidats = list(df.action_name.values)
 
+    # si pas n : on met par defualt la liste des actions entiere (on prends toute les actions)
     if not n:
         n = len(all_candidats)
+
+    # tous les combos à n actions
     combinations = get_combinations(all_candidats, n)
 
-    print(
-        f"finding best portoflio for {n }actions => {len(combinations) } combinations"
-    )
+    print(f"finding best portoflio for {n} actions soit {len(combinations) } com")
 
-    ##################################################
-    # filtered_combinantions
-    ##################################################
-
-    # ok
+    # liste des combinaisons filtrées
     filtered_combinations = list()
 
-    # ok
+    # iterer sur toutes les combinaisons
+    # On va mettre de coté les combos trop cher
     for combo in combinations:
 
         ############################################
-        # AJOUTER CODE POUR CALULER LE MIN_VALUE ET LE MAX_VALUET DU COMBO
+        # ON ne calcule pas les combos qui sont d'office trop cher
         ############################################
 
-        ############################################
-        # AJOUTER CODE POUR CALULER LE MIN_NEW_VALUE ET LE MAX_NEW_VALUE DU COMBO
-        ############################################
-
-        ############################################
-        #  CALCULER LE MINIUM THEORIQUE D'ACAHT DU PORTEFEUILLE = n action * min value
-        ############################################
-
-        ############################################
-        #  CALCULER LE MAXIMUM THEORIQUE D'argent gagné par  ce PORTEFEUILLE = n action * max new value
-        ############################################
-
-        #############################################
-        # si le min théorique > 500 => pas besoin d'aller plus loin !
-        #############################################
-
-        #############################################
-        # si le max théorique < Max observé  => pas besoin d'aller plus loin !
-        #############################################
+        _df = df.loc[df.action_name.isin(combo)]
+        _min = _df.value.min()
+        _min_theorique_valeur_d_achat = n * _min
+        # ca veut dire pas besoinde chercher dans tous les combos, ceux qui seraient trop cher
+        # il le sont tous !!!!
+        if _min_theorique_valeur_d_achat > maximum:
+            # print(f"Pas besoin de chercher ce combo à {n} actions, tous trop cher !!! ")
+            # return [f"que des combos trop cher pour {n} actions", -1]
+            continue
 
         # j'ai changé le le  nom de la variable pour t'aider
         total_depense_achat_des_actions = 0
@@ -118,27 +89,38 @@ def find_best_solution_n_action(df, n, max_obseverd_value, maximum=500.00):
     # ENSUITE ICI il FAUT FAIRE +/- la meme chose MAIS... pour la somme des valuers qu'on a gagén
     # TU PEUX COPIER / COLLER LE CODE MAIS Pour l'argent des actions qu'on a gagné
 
-    top_combo = ""
-    max_revenu = 0
+    for combo in filtered_combinations:
 
-    # Créer un dictionnaire pour stocker les nouvelles valeurs associées à chaque action
-    action_values = dict(zip(df["action_name"], df["new_value"]))
+        ############################################
+        # on ne calcule pas d'office les combos qui ne sont pas rentables
+        ############################################
 
-    # Précalculer les nouvelles valeurs pour chaque action dans combo
-    combo_values = [
-        sum(action_values[action] for action in combo)
-        for combo in filtered_combinations
-    ]
+        _max = df.value.max()
+        _max_theorique_valeur_gagnee = n * _max
+        if _max_theorique_valeur_gagnee < max_obseverd_value:
+            # print(
+            #     f"Pas besoin de chercher les combos à {n} actions, moins rentanble que ce qu'on a deja trouvé !!! "
+            # )
+            # return [f"que des combos pas assez rentables {n} actions", -1]
+            continue
 
-    # Trouver l'indice du combo avec le revenu maximal
-    max_index = max(range(len(filtered_combinations)), key=lambda i: combo_values[i])
+        total_value = 0
+        # OUI OK, MAIS Attention on break si et seulement la somme des valeurs d'acahts >500
+        for action in combo:
+            total_value += df.loc[df.action_name == action, "new_value"].iloc[0]
 
-    # Récupérer le combo avec le revenu maximal
-    top_combo = filtered_combinations[max_index]
-    max_revenu = combo_values[max_index]
+        # la on a caclulé la valeur d'achat du combo
+        # et on va filter pour savoir si > 500
+        if total_value > max_revenu:
+            # on ne garde pas ce portefeuille
+            max_revenu = total_value
+            top_combo = combo
 
     # OK
-    return top_combo, max_revenu
+    if top_combo:
+        cost = df.loc[df.action_name.isin(top_combo), "value"].sum()
+
+    return n, top_combo, cost, max_revenu, round(time.time() - t_0, 2)
 
 
 def return_csv_file():
@@ -156,10 +138,6 @@ def return_csv_file():
 
         if not i:
             continue
-
-        # logging
-        # logging.warning(data)
-        # logging.warning(type(data))
 
         # add to li
         li.append((data[0], float(data[1]), float(data[2])))
@@ -205,31 +183,44 @@ def main():
 
     n_candidates = len(all_candidats)
 
-    best_revnue = 0
+    old_best_revnue = 0
     li = []
 
-    # on este tous les portefeuilles à 1, action, à 2 action à 3 actions etc etc etc
-    for i in range(n_candidates, 0):
-        # on part du plus grand nombre de combo et on va à a 1
+    # on teste tous les portefeuilles à 1, action, à 2 action à 3 actions etc etc etc
+    for i in range(n_candidates - 1, 1, -1):
 
-        # si un combo est d'office trop cher // pas évalué
-        # si un combo a 0% de chances de pas faire mieux => pas évalueée
+        # on part DESORMAIS du plus grand nombre de combo et on va à a 1
+        # si un combo est d'office trop cher // pas évalué => nombre actions * valeur Min d'une action du portefeuille
+        # si un combo a 0% de chances de pas faire mieux => pas évalueée si notre max_value par ex 600 = > il suffit de prendre
+        # le max téhorique et de l'evaluer
         # ansi on gagne en rapidité en virant d'office tous les combos trop cher / pas assez gagnants
         # soit 90% des combos!
 
-        combo, best_revnue = find_best_solution_n_action(df, best_revnue, n=i)
+        n, combo, cost, new_possible_best_revenue, duration = (
+            find_best_solution_n_action(
+                df,
+                i,
+                old_best_revnue,
+                500.00,
+            )
+        )
 
-        li.append([i, combo, best_revnue])
+        li.append([n, combo, cost, new_possible_best_revenue, duration])
+
+        if new_possible_best_revenue > old_best_revnue:
+            old_best_revnue = new_possible_best_revenue
 
     # on tri notre liste finale
-    li = sorted(li, key=lambda i: i[2])
+    li = sorted(li, key=lambda i: i[2], reverse=True)
 
     # on prend le dernier
-    final_i, final_combo, final_best_revenue = li[-1]
+    final_i, final_combo, final_best_revenue = li[0]
 
     print(
-        f"$$$$$$$$$ n_action {final_i }, combo{ final_combo} => revenue {final_best_revenue} $$$$$$$$"
+        f"\n\n\n$$$$$$$$$ n_action {final_i }, combo{ final_combo} => revenue {final_best_revenue} $$$$$$$$\n\n\n"
     )
+
+    print(f"3 best combos : {li[:3]}")
 
 
 if __name__ == "__main__":
